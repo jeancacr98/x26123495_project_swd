@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flight System - Dashboard</title>
+</head>
+<body>
+    <h2>Passenger Management Dashboard</h2>
+    <p>Welcome, <strong>{{ request.user.username }}</strong>!</p>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+
+    <hr>
+    <h3>Passenger List</h3>
+    <ul>
+        {% for passenger in passengers %}
+            <li>{{ passenger }} - Status: {{ passenger.status }}</li>
+        {% empty %}
+            <li>No passengers registered yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
