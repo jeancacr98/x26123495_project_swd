@@ -1,8 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from flights import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Enable login, logout and reset password
+    path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('', include('django.contrib.auth.urls')),
+    path('', views.dashboard, name='dashboard'),
 ]
