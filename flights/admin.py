@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Passenger
 
-#Show this table
+#Admin panel 
+
+#Built-in Django Admin interface using the model created
 admin.site.register(Passenger)
