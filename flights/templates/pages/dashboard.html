@@ -6,8 +6,10 @@
 </head>
 <body>
     <h2>Passenger Management Dashboard</h2>
+     <!-- Request current username -->
     <p>Welcome, <strong>{{ request.user.username }}</strong>!</p>
 
+     <!-- POST and token to prevent forced logout attacks -->
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
         <button type="submit">Logout</button>
@@ -16,6 +18,7 @@
     <hr>
     <h3>Passenger List</h3>
     <ul>
+         <!-- Secure way to iterate the passengers list -->
         {% for passenger in passengers %}
             <li>{{ passenger }} - Status: {{ passenger.status }}</li>
         {% empty %}

@@ -128,6 +128,10 @@ MAILERS = {
     },
 }
 
+#Auth and Security Redirection
+#URL for unauthenticated users
 LOGIN_URL = '/login/'
+#Successful login
 LOGIN_REDIRECT_URL = '/'
+#After log out
 LOGOUT_REDIRECT_URL = '/login/'
