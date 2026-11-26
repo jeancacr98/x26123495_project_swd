@@ -1,29 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Flight System - Dashboard</title>
 </head>
+
 <body>
     <h2>Passenger Management Dashboard</h2>
-     <!-- Request current username -->
     <p>Welcome, <strong>{{ request.user.username }}</strong>!</p>
 
-     <!-- POST and token to prevent forced logout attacks -->
+    <!-- Secure Logout Form -->
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
         <button type="submit">Logout</button>
     </form>
 
     <hr>
+
+    <!-- Only shows 'Add' button if user has add_passenger permission -->
+    {% if perms.flights.add_passenger %}
+    <p><a href="{% url 'passenger_create' %}">+ Add New Passenger</a></p>
+    {% endif %}
+
     <h3>Passenger List</h3>
-    <ul>
-         <!-- Secure way to iterate the passengers list -->
-        {% for passenger in passengers %}
-            <li>{{ passenger }} - Status: {{ passenger.status }}</li>
-        {% empty %}
-            <li>No passengers registered yet.</li>
-        {% endfor %}
-    </ul>
+    <table border="1" cellpadding="8">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Flight</th>
+                <th>Seat</th>
+                <th>Status</th>
+                {% if perms.flights.change_passenger or perms.flights.delete_passenger %}
+                <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for passenger in passengers %}
+            <tr>
+                <td>{{ passenger.full_name }}</td>
+                <td>{{ passenger.flight_number }}</td>
+                <td>{{ passenger.seat_number }}</td>
+                <td>{{ passenger.status }}</td>
+
+                {% if perms.flights.change_passenger or perms.flights.delete_passenger %}
+                <td>
+                    {% if perms.flights.change_passenger %}
+                    <a href="{% url 'passenger_update' passenger.pk %}">Edit</a>
+                    {% endif %}
+
+                    {% if perms.flights.delete_passenger %}
+                    |
+                    <form method="post" action="{% url 'passenger_delete' passenger.pk %}" style="display:inline;"
+                        onsubmit="return confirm('Are you sure you want to delete {{ passenger.full_name|escapejs }}?');">
+                        {% csrf_token %}
+                        <button type="submit"
+                            style="color: red; background: none; border: none; padding: 0; text-decoration: underline; cursor: pointer;">
+                            Delete
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No passengers registered yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
+
 </html>
