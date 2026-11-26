@@ -1,76 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Flight System - Dashboard</title>
-</head>
+{% block title %}Dashboard - Flight System{% endblock %}
 
-<body>
-    <h2>Passenger Management Dashboard</h2>
-    <p>Welcome, <strong>{{ request.user.username }}</strong>!</p>
-
-    <!-- Secure Logout Form -->
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-
-    <hr>
-
-    <!-- Only shows 'Add' button if user has add_passenger permission -->
-    {% if perms.flights.add_passenger %}
-    <p><a href="{% url 'passenger_create' %}">+ Add New Passenger</a></p>
-    {% endif %}
-
-    <h3>Passenger List</h3>
-    <table border="1" cellpadding="8">
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Flight</th>
-                <th>Seat</th>
-                <th>Status</th>
-                {% if perms.flights.change_passenger or perms.flights.delete_passenger %}
-                <th>Actions</th>
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h4 class="mb-0 text-primary">Passengers List</h4>
+        
+        <div class="d-flex gap-2">
+            <!-- Secure Search Form (GET) -->
+            <form method="get" action="{% url 'dashboard' %}" class="d-flex">
+                <input type="text" 
+                       name="q" 
+                       value="{{ search_query }}" 
+                       class="form-control form-control-sm me-2" 
+                       placeholder="Passenger name">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Search</button>
+                {% if search_query %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm ms-1">Clear</a>
                 {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for passenger in passengers %}
-            <tr>
-                <td>{{ passenger.full_name }}</td>
-                <td>{{ passenger.flight_number }}</td>
-                <td>{{ passenger.seat_number }}</td>
-                <td>{{ passenger.status }}</td>
+            </form>
 
-                {% if perms.flights.change_passenger or perms.flights.delete_passenger %}
-                <td>
-                    {% if perms.flights.change_passenger %}
-                    <a href="{% url 'passenger_update' passenger.pk %}">Edit</a>
-                    {% endif %}
+            <!-- RBAC UI Control -->
+            {% if perms.flights.add_passenger %}
+                <a href="{% url 'passenger_create' %}" class="btn btn-success btn-sm">
+                    + Add Passenger
+                </a>
+            {% endif %}
+        </div>
+    </div>
 
-                    {% if perms.flights.delete_passenger %}
-                    |
-                    <form method="post" action="{% url 'passenger_delete' passenger.pk %}" style="display:inline;"
-                        onsubmit="return confirm('Are you sure you want to delete {{ passenger.full_name|escapejs }}?');">
-                        {% csrf_token %}
-                        <button type="submit"
-                            style="color: red; background: none; border: none; padding: 0; text-decoration: underline; cursor: pointer;">
-                            Delete
-                        </button>
-                    </form>
-                    {% endif %}
-                </td>
-                {% endif %}
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">No passengers registered yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-
-</html>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Full Name</th>
+                        <th>Flight</th>
+                        <th>Origin</th>
+                        <th>Destination</th>
+                        <th>Departure Date</th>
+                        <th>Seat</th>
+                        <th>Status</th>
+                        {% if perms.flights.change_passenger or perms.flights.delete_passenger %}
+                            <th class="text-end pe-4">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for passenger in passengers %}
+                        <tr>
+                            <td class="ps-4 fw-medium">{{ passenger.full_name }}</td>
+                            <td><span class="badge bg-secondary">{{ passenger.flight.flight_number }}</span></td>
+                            <td>{{ passenger.flight.origin }}</td>
+                            <td>{{ passenger.flight.destination }}</td>
+                            <td>{{ passenger.flight.departure_date }}</td>
+                            <td>{{ passenger.seat_number }}</td>
+                            <td>
+                                {% if passenger.status == 'Boarded' %}
+                                    <span class="badge bg-success">Boarded</span>
+                                {% elif passenger.status == 'Cancelled' %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+                            
+                            {% if perms.flights.change_passenger or perms.flights.delete_passenger %}
+                                <td class="text-end pe-4">
+                                    {% if perms.flights.change_passenger %}
+                                        <a href="{% url 'passenger_update' passenger.pk %}" class="btn btn-outline-primary btn-sm">
+                                            Edit
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if perms.flights.delete_passenger %}
+                                        <form method="post" 
+                                              action="{% url 'passenger_delete' passenger.pk %}" 
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete {{ passenger.full_name|escapejs }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                {% if search_query %}
+                                    No passengers found matching "{{ search_query }}".
+                                {% else %}
+                                    No passengers registered yet.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

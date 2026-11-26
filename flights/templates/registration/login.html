@@ -1,33 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Flight System - Login</title>
-</head>
-<body>
-    <h2>Login to Flight System</h2>
-    
-    <!-- Message if the username and/or password is not correct. -->
-    {% if form.errors %}
-        <p style="color: red;">Your username and password didn't match. Please try again.</p>
-    {% endif %}
+{% extends 'base.html' %}
 
-     <!-- POST method using the login to protect the data -->
-    <form method="post" action="{% url 'login' %}">
-        <!-- Token against CSRF by Django -->
-        {% csrf_token %}
-        
-        <div>
-            <label for="username">Username:</label>
-            {{ form.username }}
+{% block title %}Login - Flight System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 85vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow border-0">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4 class="mb-0">Flight System Login</h4>
+            </div>
+            <div class="card-body p-4">
+                
+                <!-- Generic authentication error message -->
+                {% if form.errors %}
+                    <div class="alert alert-danger py-2" role="alert">
+                        Invalid username or password. Please try again.
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label fw-semibold">Username</label>
+                        <input type="text" name="username" id="id_username" class="form-control" required autofocus>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_password" class="form-label fw-semibold">Password</label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <br>
-        <div>
-            <label for="password">Password:</label>
-            {{ form.password }}
-        </div>
-        <br>
-        <button type="submit">Login</button>
-    </form>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

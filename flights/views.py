@@ -8,9 +8,19 @@ from .forms import PassengerForm
 
 @login_required
 def dashboard(request):
-    #Dashboard for all the roles
-    passengers = Passenger.objects.all()
-    return render(request, 'pages/dashboard.html', {'passengers': passengers})
+    search_query = request.GET.get('q', '').strip()
+    
+    if search_query:
+        passengers = Passenger.objects.select_related('flight').filter(
+            full_name__icontains=search_query
+        )
+    else:
+        passengers = Passenger.objects.select_related('flight').all()
+        
+    return render(request, 'pages/dashboard.html', {
+        'passengers': passengers,
+        'search_query': search_query
+    })
 
 
 #Login and permission to create a new passenger
